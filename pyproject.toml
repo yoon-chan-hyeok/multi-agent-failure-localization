@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tsr-loc"
+version = "0.1.0"
+description = "Training-free failure attribution for multi-agent execution trajectories"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+  { name = "Chanhyuk Yoon" }
+]
+
+[project.optional-dependencies]
+local-hf = [
+  "accelerate>=0.30",
+  "torch>=2.1",
+  "transformers>=4.43"
+]
+test = ["pytest>=8"]
+
+[tool.setuptools]
+packages = ["failure_attribution"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+

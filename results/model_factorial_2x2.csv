@@ -1,0 +1,6 @@
+requirement_compiler,localizer,cases,agent_accuracy,exact_step_accuracy,step_pm3_accuracy,step_pm5_accuracy
+Llama-3.1-8B,Llama-3.1-8B,184,0.3804,0.1848,0.6739,0.7826
+GPT-4o,Llama-3.1-8B,184,0.4293,0.1902,0.6630,0.7609
+Llama-3.1-8B,GPT-4o,184,0.5109,0.3750,0.6576,0.7826
+GPT-4o,GPT-4o,184,0.5761,0.3859,0.6685,0.8043
+

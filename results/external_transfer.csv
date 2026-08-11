@@ -1,0 +1,8 @@
+dataset,split,cases,method,agent_or_role_any,step_any,majority,unanimous
+MP-Bench,Manual-positive,157,Direct,0.1019,0.2994,0.1146,0.0446
+MP-Bench,Manual-positive,157,TSR-Loc-No-GT,0.4777,0.5096,0.2994,0.1146
+MP-Bench,Automatic,120,Direct,0.2750,0.6750,0.4083,0.1917
+MP-Bench,Automatic,120,TSR-Loc-No-GT,0.8333,0.8333,0.6833,0.3250
+MP-Bench,MAST-source,100,A2P-repo-exact,0.5600,0.6700,0.3200,0.1600
+MP-Bench,MAST-source,100,TSR-Loc-No-GT,0.5200,0.5700,0.3100,0.1100
+

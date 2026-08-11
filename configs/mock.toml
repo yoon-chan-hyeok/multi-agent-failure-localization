@@ -1,0 +1,27 @@
+[data]
+generated_step_base = 1
+
+[llm]
+backend = "mock"
+model = "deterministic-smoke-test"
+temperature = 0.0
+max_tokens = 1024
+timeout_seconds = 120
+
+[methods.mvbs10]
+chunks = 10
+beam_k = 3
+window_size = 5
+stride = 2
+overlap_steps = 2
+max_candidates = 5
+pairwise = true
+max_step_chars = 10000
+max_chunk_chars = 12000
+
+[methods.ccv_ablation_no_gt]
+max_step_chars = 30000
+
+[methods.ccv_full_trace]
+max_step_chars = 30000
+
