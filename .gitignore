@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+configs/local.toml
+*.pem
+*.key
+
+# Generated experiment artifacts
+outputs/
+output/
+tmp/
+*.log
+
+# Benchmark data is downloaded separately.
+data/*.jsonl
+!data/sample_who_when.jsonl
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+desktop.ini
+

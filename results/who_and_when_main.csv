@@ -1,0 +1,9 @@
+method,model,cases,agent_accuracy,exact_step_accuracy,step_pm3_accuracy,step_pm5_accuracy,scope
+WhoAndWhen-Direct,GPT-4o,184,0.5163,0.0815,,,full
+A2P-repo-exact,GPT-4o,184,0.6304,0.3315,0.6250,0.7663,full
+TSR-Loc-No-GT,GPT-4o,184,0.5761,0.3859,0.6685,0.8043,full
+TSR-Loc-GT-assisted,GPT-4o,184,0.6033,0.3967,,,full
+A2P-repo-exact,GPT-4o,23,0.6522,0.0435,,,HC-long-posthoc
+TSR-Loc-No-GT,GPT-4o,23,,0.2609,,,HC-long-posthoc
+TSR-Loc-GT-assisted,GPT-4o,23,,0.3043,,,HC-long-posthoc
+
