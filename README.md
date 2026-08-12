@@ -9,19 +9,25 @@
 ![Training](https://img.shields.io/badge/Fine--tuning-None-5B6573)
 ![CI](https://github.com/yoon-chan-hyeok/multi-agent-failure-localization/actions/workflows/ci.yml/badge.svg)
 
-[핵심 결과](#핵심-결과) · [방법](#tsr-loc) · [빠른 실행](#빠른-실행) · [재현 문서](docs/REPRODUCIBILITY.md)
+[검증 결과](#검증-결과) · [방법](#tsr-loc-구조) · [빠른 실행](#구현과-재현) · [재현 문서](docs/REPRODUCIBILITY.md)
 
 </div>
 
 ---
 
-## 문제
+## 평가 제약
 
-Multi-agent system이 실패하면 trace에는 계획, 도구 호출, 수정 시도와 최종 응답이 함께 남습니다. 마지막에 잘못 말한 agent만 찾으면 원인이 된 이전 오류를 놓칠 수 있고, 회복된 실수까지 원인으로 선택할 수 있습니다.
+Multi-agent system이 실패하면 trace에는 계획, 도구 호출, 수정 시도와 최종 응답이 함께 남습니다. 최종 응답만 보면 앞에서 시작된 오류를 놓치고, trace의 첫 실수만 고르면 이후에 이미 복구된 사건을 원인으로 지목할 수 있습니다. 긴 실행 기록을 사람이 매번 처음부터 읽는 것도 운영 가능한 평가 방식이 아닙니다.
 
-TSR-Loc은 task의 성공 조건을 trace보다 먼저 고정합니다. 그 조건을 기준으로 trace를 시간순으로 검사해 이후에도 복구되지 않은 가장 이른 오류를 responsible agent와 exact step으로 반환합니다.
+## 연구 질문
 
-## 설계 의도
+> Final failure로 이어진 오류를, responsible agent뿐 아니라 다시 설계해야 할 exact step까지 찾을 수 있는가?
+
+여기서 찾고자 한 대상은 단순한 최초 오류가 아닙니다. 이후 step에서도 복구되지 않은 가장 이른 오류입니다. 또한 실패 trace를 본 뒤 성공 기준을 바꾸지 않도록 task description만으로 requirement를 먼저 고정했습니다.
+
+## 접근과 선택 이유
+
+TSR-Loc은 task 해석과 trace localization을 두 단계로 나눕니다. Requirement compiler는 trace를 보기 전에 성공 조건을 작성하고, localizer는 그 기준으로 trace를 시간순으로 검사해 responsible agent와 earliest unrecovered step을 반환합니다.
 
 ### 왜 task requirement를 먼저 고정했는가
 
@@ -35,7 +41,7 @@ Agent는 중간에 실수해도 다음 step에서 수정할 수 있습니다. �
 
 책임 agent를 맞혀도 어느 action을 고쳐야 하는지 모르면 trace를 다시 전부 읽어야 합니다. 반대로 step 위치만 가까워도 다른 agent를 선택하면 수정 대상이 달라집니다. 그래서 agent accuracy와 exact-step accuracy를 분리하고, 정답 step에 얼마나 가까웠는지는 tolerance와 distance로 따로 기록했습니다.
 
-## TSR-Loc
+## TSR-Loc 구조
 
 ```mermaid
 flowchart LR
@@ -54,7 +60,7 @@ flowchart LR
 
 구현 정의와 worked example은 [Method](docs/METHOD.md)에 있습니다.
 
-## 핵심 결과
+## 검증 결과
 
 주요 비교는 Who&When 184 trajectories, GPT-4o, strict local evaluator 조건입니다.
 
