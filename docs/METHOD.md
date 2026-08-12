@@ -61,8 +61,6 @@ Attribution
            propagates the unsupported evidence and is a downstream consequence.
 ```
 
-![Worked example](../assets/tsr_loc_worked_example_academic.png)
-
 ## Multi-View Beam Log Search
 
 `mvbs10` is an earlier custom exploratory method retained in the codebase.

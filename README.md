@@ -21,6 +21,20 @@ Multi-agent system이 실패하면 trace에는 계획, 도구 호출, 수정 시
 
 TSR-Loc은 task의 성공 조건을 trace보다 먼저 고정합니다. 그 조건을 기준으로 trace를 시간순으로 검사해 이후에도 복구되지 않은 가장 이른 오류를 responsible agent와 exact step으로 반환합니다.
 
+## 설계 의도
+
+### 왜 task requirement를 먼저 고정했는가
+
+Trace와 최종 실패를 먼저 본 뒤 성공 조건을 만들면 관찰한 오류에 맞춰 기준을 바꾸게 됩니다. 이를 막기 위해 requirement compiler에는 task description만 제공해 성공 조건을 먼저 작성하고, localizer가 나중에 그 기준으로 trace를 읽도록 분리했습니다.
+
+### 왜 최초 오류가 아니라 최초 미복구 오류인가
+
+Agent는 중간에 실수해도 다음 step에서 수정할 수 있습니다. 단순히 가장 이른 오류를 고르면 최종 실패에 영향을 주지 않은 사건까지 원인으로 지목하게 됩니다. TSR-Loc은 이후 step에서 복구됐는지를 함께 확인하고, 최종 결과를 바꾸기 위해 다시 설계해야 할 가장 이른 지점을 선택합니다.
+
+### 왜 agent와 exact step을 따로 평가했는가
+
+책임 agent를 맞혀도 어느 action을 고쳐야 하는지 모르면 trace를 다시 전부 읽어야 합니다. 반대로 step 위치만 가까워도 다른 agent를 선택하면 수정 대상이 달라집니다. 그래서 agent accuracy와 exact-step accuracy를 분리하고, 정답 step에 얼마나 가까웠는지는 tolerance와 distance로 따로 기록했습니다.
+
 ## TSR-Loc
 
 ```mermaid
@@ -55,6 +69,8 @@ flowchart LR
 - 따라서 A2P보다 우수하다는 주장이나 benchmark-wide SOTA 주장은 하지 않습니다.
 
 Compiler와 localizer를 교차한 실험에서는 이 조건에서 localizer 교체 영향이 더 컸습니다. 탐색 실험과 방향 수정 과정은 [Experiment history](docs/EXPERIMENT_HISTORY.md)에 분리했습니다.
+
+초기에는 긴 trace를 chunk로 나누는 방법을 중심으로 실험했습니다. Agent 선택은 일부 조건에서 좋아졌지만 exact-step 결과가 안정적으로 개선되지 않았습니다. 이 실패를 바탕으로 chunking을 주된 주장에서는 내리고, task interpretation과 recovery-aware localization을 분리하는 방향으로 바꿨습니다.
 
 ## 구현과 재현
 
