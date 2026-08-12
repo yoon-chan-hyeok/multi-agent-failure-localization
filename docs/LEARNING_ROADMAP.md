@@ -1,27 +1,12 @@
-# Learning & Engineering Roadmap
+# 미구현 확장 계획
 
-## 1. 로그 데이터 엔지니어링
+아래 항목은 현재 프로젝트 결과가 아니라 이후 학습과 구현 후보입니다.
 
-- agent, step, tool call, observation, timestamp를 갖는 typed event schema 설계
-- 손상된 JSONL, 중복 event, 누락된 parent를 검출하는 validation
-- 긴 로그를 streaming으로 읽고 재시작 가능한 ingestion 구현
+## 로그와 평가 운영화
 
-**완료 증거:** JSON Schema, validation 테스트, 1GB 합성 로그 부하 실험
+- 실행·step·agent·tool event schema와 대용량 trace 저장
+- batch 평가 queue, retry, idempotency와 failed-case 격리
+- agent와 step attribution의 calibration, confidence interval과 error taxonomy
+- API, worker, metrics, trace와 dashboard
 
-## 2. 평가·통계
-
-- agent accuracy, step accuracy, joint accuracy, top-k recall 분리
-- bootstrap confidence interval과 paired significance test
-- judge 순서·표현 변화에 대한 민감도 테스트
-
-**완료 증거:** 한 명령으로 생성되는 결과 표와 error taxonomy 리포트
-
-## 3. 관측 가능성과 서비스화
-
-- OpenTelemetry span을 평가 trace로 변환
-- async worker와 idempotent job 설계
-- FastAPI 기반 분석 endpoint와 CLI 제공
-- CI에서 작은 고정 benchmark 회귀 테스트
-
-**완료 증거:** trace 업로드부터 원인 후보 출력까지 end-to-end demo
-
+완료 기준은 공개 synthetic trace로 재현되는 ingestion과 evaluation pipeline, CI, API와 운영 runbook입니다.
