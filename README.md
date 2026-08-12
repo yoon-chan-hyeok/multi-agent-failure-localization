@@ -22,15 +22,15 @@
 | **문제** | 최종 실패를 만든 agent와 정확한 최초 결정적 step을 trace에서 어떻게 찾을까? |
 | **접근** | task 해석을 frozen success requirements로 먼저 고정한 뒤 trajectory를 시간순 분석 |
 | **평가** | Who&When 184 trajectories, strict local evaluator, paired significance |
-| **결과** | task-only TSR-Loc exact-step **38.59%**, Direct **8.15%** 대비 **+30.43%p** |
+| **결과** | 100건 중 약 **39건에서 정확한 실패 지점**을 찾음 — 전체 기록을 한 번에 읽는 방식은 약 8건 |
 | **공개 증거** | 실험 harness, method registry, model backends, 결과표, 테스트, CI |
 
 <table>
 <tr>
-<td width="25%" align="center"><h3>184</h3><sub>Who&amp;When<br/>Trajectories</sub></td>
-<td width="25%" align="center"><h3>38.59%</h3><sub>Task-only<br/>Exact-step</sub></td>
-<td width="25%" align="center"><h3>+30.43%p</h3><sub>Exact-step<br/>vs Direct</sub></td>
-<td width="25%" align="center"><h3>p = 5.77e-12</h3><sub>Paired<br/>McNemar</sub></td>
+<td width="25%" align="center"><h3>184건</h3><sub>실패 기록으로<br/>반복 평가</sub></td>
+<td width="25%" align="center"><h3>100건 중 약 39건</h3><sub>정확한 실패<br/>지점 확인</sub></td>
+<td width="25%" align="center"><h3>단순 방식은 8건</h3><sub>전체 기록을<br/>한 번에 판정</sub></td>
+<td width="25%" align="center"><h3>추가 학습 없음</h3><sub>기존 모델로<br/>바로 적용</sub></td>
 </tr>
 </table>
 
