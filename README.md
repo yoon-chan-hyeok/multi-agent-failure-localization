@@ -1,8 +1,8 @@
-![TSR-Loc — project hero](assets/project-hero.svg)
+![TSR-Loc project hero](assets/project-hero.svg)
 
 <div align="center">
 
-**긴 multi-agent trace에서 책임 agent와 결정적 실패 step을 찾는 training-free 평가 연구**
+**Multi-agent execution trace에서 task requirements를 먼저 고정하고, final failure로 이어진 earliest unrecovered error를 agent·step 수준에서 localization하는 training-free 평가 프레임워크**
 
 ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)
 ![Evaluation](https://img.shields.io/badge/Evaluation-Agent%20%2B%20Exact%20Step-7C3AED)
@@ -15,26 +15,17 @@
 
 ---
 
-## 30초 요약
+## 프로젝트 개요
 
-| 질문 | 답 |
+| 구분 | 내용 |
 |---|---|
-| **문제** | 최종 실패를 만든 agent와 정확한 최초 결정적 step을 trace에서 어떻게 찾을까? |
-| **접근** | task 해석을 frozen success requirements로 먼저 고정한 뒤 trajectory를 시간순 분석 |
-| **평가** | Who&When 184 trajectories, strict local evaluator, paired significance |
-| **결과** | 100건 중 약 **39건에서 정확한 실패 지점**을 찾음 — 전체 기록을 한 번에 읽는 방식은 약 8건 |
-| **공개 증거** | 실험 harness, method registry, model backends, 결과표, 테스트, CI |
+| **Input** | task description과 agent별 action, observation이 포함된 execution trajectory |
+| **Requirement compiler** | attribution label이나 trace를 보지 않고 성공 조건을 task-only requirement로 고정 |
+| **Temporal localizer** | trace를 시간순으로 검사해 이후 step에서 복구되지 않은 가장 이른 오류를 선택 |
+| **Output** | responsible agent와 exact failure step, requirement-level rationale |
+| **Evaluation** | Who&When 184 trajectories에서 strict local evaluator와 paired significance test를 적용 |
 
-<table>
-<tr>
-<td width="25%" align="center"><h3>184건</h3><sub>실패 기록으로<br/>반복 평가</sub></td>
-<td width="25%" align="center"><h3>100건 중 약 39건</h3><sub>정확한 실패<br/>지점 확인</sub></td>
-<td width="25%" align="center"><h3>단순 방식은 8건</h3><sub>전체 기록을<br/>한 번에 판정</sub></td>
-<td width="25%" align="center"><h3>추가 학습 없음</h3><sub>기존 모델로<br/>바로 적용</sub></td>
-</tr>
-</table>
-
-> TSR-Loc은 production monitoring service가 아니라 **검증 가능한 research artifact**입니다. benchmark-wide SOTA나 형식적 인과 검증은 주장하지 않습니다.
+TSR-Loc은 production monitoring service가 아니라 재현 가능한 evaluation artifact입니다. benchmark-wide SOTA나 causal attribution은 주장하지 않습니다.
 
 ## Why exact-step attribution matters
 
@@ -130,8 +121,11 @@ smoke test는 deterministic mock backend와 synthetic trajectory를 사용하며
 - TraceElephant compact 결과는 native full-observability 결과가 아닙니다.
 - universal SOTA와 token efficiency는 주장하지 않습니다.
 
-## Ownership & collaboration
+## 기여 범위
 
-연구 framing, 실험 설계, 비교 기준, failure analysis, evaluation protocol과 반복 검증을 직접 주도했습니다. Codex는 구현·분석 협업에 활용했습니다. 선행연구와 구현 경계는 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)와 [한국어 프로젝트 설명](docs/PORTFOLIO_KO.md)에 구분했습니다.
+연구 framing, 실험 설계, baseline 선정, failure analysis, evaluation protocol과 반복 검증을 맡았습니다. 선행연구와 자체 구현의 경계는 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)와 [한국어 프로젝트 설명](docs/PORTFOLIO_KO.md)에 구분했습니다.
 
-**Deep dive** · [Method](docs/METHOD.md) · [Results](results/README.md) · [Reproducibility](docs/REPRODUCIBILITY.md) · [Roadmap](docs/LEARNING_ROADMAP.md)
+## 문서
+
+[Method](docs/METHOD.md) · [Results](results/README.md) · [Reproducibility](docs/REPRODUCIBILITY.md) · [Roadmap](docs/LEARNING_ROADMAP.md)
+
