@@ -42,20 +42,11 @@
 - Human evaluation covered 337 generated requirements: 97.63% and 96.74% validity by
   two raters, Cohen's kappa `0.838`.
 
-## Known engineering failures encountered
+## Execution safeguards
 
-- Llama FP16 long-context inference attempted a 143.41 GiB CUDA allocation on a
-  24 GiB RTX 3090.
-- Early MVBS runs contained 13 OOM/null predictions.
-- A GPT-5.5 exploratory run produced 57 null outputs and required failed-case reruns.
-- One step-wise validation case consumed 69 calls and 311,803 tokens.
-- A TraceElephant step exceeded 457,000 characters and required deterministic
-  compaction.
-- Windows path-length and missing-parent errors required long-path-safe file handling
-  and explicit directory creation.
-
-These failures motivated process-level sharding, resumable execution, null-case repair,
-input caps for local models, and explicit output-path handling.
+Long traces and hosted-model failures required process-level sharding, resumable
+execution, null-case repair, input caps for local models and explicit output-path
+handling. Failed offsets were rerun before shards were merged.
 
 ## Claim boundaries
 

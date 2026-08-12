@@ -21,15 +21,15 @@ The loader accepts flexible Who&When-style records. A minimal record is:
 Explicit step fields are preserved. Otherwise the loader generates step identifiers
 starting from `data.generated_step_base` in the TOML configuration.
 
-## Benchmarks used in the completed project
+## Benchmarks used
 
 | Benchmark | Cases used | Step range | Attribution labels |
 |---|---:|---:|---|
-| Who&When AG | 126 | 5–10 | named agent, exact step, reason |
-| Who&When HC | 58 | 5–130 | canonical agent, exact step, reason |
-| MP-Bench Automatic | 120 | 5–10 | multiple agent/step annotations |
-| MP-Bench Manual | 169 | 5–130 | multiple agent/step annotations |
-| TraceElephant compact | 218 | 5–94 | responsible actor, failure boundary |
+| Who&When AG | 126 | 5 to 10 | named agent, exact step, reason |
+| Who&When HC | 58 | 5 to 130 | canonical agent, exact step, reason |
+| MP-Bench Automatic | 120 | 5 to 10 | multiple agent/step annotations |
+| MP-Bench Manual | 169 | 5 to 130 | multiple agent/step annotations |
+| TraceElephant compact | 218 | 5 to 94 | responsible actor, failure boundary |
 
 The commonly reported HC-long slice contains 23 Who&When HC trajectories with more
 than 50 steps. It is a repeatedly inspected post-hoc slice.
@@ -44,7 +44,7 @@ than 50 steps. It is a repeatedly inspected post-hoc slice.
 - **MP-Bench Majority / Unanimous:** prediction satisfies the corresponding human
   agreement criterion.
 
-Joint agent-step-error accuracy is not the primary metric in this portfolio.
+Joint agent-step-error accuracy is not the primary metric in this repository.
 
 ## Annotation cautions
 

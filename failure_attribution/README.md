@@ -17,7 +17,7 @@ artifacts over a minimal production API.
 | `prompts.py` | prompt registry for baselines, TSR-Loc, A2P, ECHO-style, CCV, and chunk methods |
 | `shared_cache.py` | frozen requirement/constraint cache validation |
 
-## Main portfolio entry points
+## Main entry points
 
 - `run_method(...)` in `methods.py`: central method dispatcher.
 - `run_who_when_official_all_at_once(...)`: official-style Direct condition.
@@ -47,7 +47,7 @@ prompts/
   external_methods.py
 ```
 
-That refactor is intentionally not performed in this portfolio snapshot because it
+That refactor is intentionally not performed in this research snapshot because it
 would make the released code differ from the implementation that produced the stored
 experiment artifacts.
 
