@@ -25,6 +25,12 @@ Multi-agent system이 최종 답변에 실패했을 때 전체 trace에는 계�
 
 Agent 시스템을 고치려면 "실패했다"는 판정보다 어느 agent의 어떤 step을 다시 설계해야 하는지가 필요합니다. 그런데 기존 평가는 최종 성공 여부나 agent attribution에 머무는 경우가 많았습니다. 재현 가능한 trace-level 평가와 실제 수정 지점을 연결하기 위해 이 프로젝트를 만들었습니다.
 
+### 이 프로젝트에서 적용한 접근
+
+처음부터 복잡한 학습기를 붙이기보다 task의 성공 조건을 먼저 고정하고 trace를 시간순으로 읽는 작은 규칙에서 출발했습니다. requirement compiler와 localizer를 분리한 뒤, agent만 맞히는 평가와 exact step까지 맞히는 평가를 따로 두어 가설이 실제 수정 지점 탐색에 도움이 되는지 확인했습니다.
+
+결과가 기대와 다를 때는 전체 평균만 보지 않고 trace length, requirement source, localizer 방식과 오류 유형을 나눠 다시 실험했습니다. 이 과정은 factorial 결과와 experiment history에 남겼습니다. 통계적으로 유의하지 않은 비교와 post-hoc subset도 구분해, 확인한 내용과 아직 주장할 수 없는 내용을 함께 공개했습니다.
+
 ## 상세 설명
 
 | 구분 | 내용 |
