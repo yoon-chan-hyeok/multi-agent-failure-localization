@@ -15,6 +15,15 @@
 
 ---
 
+## 프로젝트 맥락
+
+| 구분 | 내용 |
+|---|---|
+| 작업 형태 | 개인 주도 연구 프로젝트 |
+| 담당 | 연구 질문, 방법 방향, baseline 조건, evaluation target과 protocol, 결과 해석 |
+| 구현 방식 | Codex를 활용한 experiment harness 구축과 반복 검증 |
+| 공개 범위 | 실행 코드, synthetic smoke case, aggregate result와 재현 문서 |
+
 ## 평가 제약
 
 Multi-agent system이 실패하면 trace에는 계획, 도구 호출, 수정 시도와 최종 응답이 함께 남습니다. 최종 응답만 보면 앞에서 시작된 오류를 놓치고, trace의 첫 실수만 고르면 이후에 이미 복구된 사건을 원인으로 지목할 수 있습니다. 긴 실행 기록을 사람이 매번 처음부터 읽는 것도 운영 가능한 평가 방식이 아닙니다.
@@ -76,7 +85,7 @@ flowchart LR
 
 Compiler와 localizer를 교차한 실험에서는 이 조건에서 localizer 교체 영향이 더 컸습니다. 탐색 실험과 방향 수정 과정은 [Experiment history](docs/EXPERIMENT_HISTORY.md)에 분리했습니다.
 
-초기에는 긴 trace를 chunk로 나누는 방법을 중심으로 실험했습니다. Agent 선택은 일부 조건에서 좋아졌지만 exact-step 결과가 안정적으로 개선되지 않았습니다. 이 실패를 바탕으로 chunking을 주된 주장에서는 내리고, task interpretation과 recovery-aware localization을 분리하는 방향으로 바꿨습니다.
+초기에는 fixed·adaptive chunk, top-k reread, multi-view와 pairwise reranking처럼 긴 trace를 나누고 다시 읽는 방법을 실험했습니다. 작은 chunk는 원인과 이후 맥락을 분리했고, 큰 chunk는 long-context 문제로 돌아갔습니다. Agent 선택은 일부 조건에서 좋아졌지만 exact-step 결과는 안정적으로 개선되지 않았습니다. 이 실패를 바탕으로 chunking을 주된 주장에서는 내리고, task interpretation과 recovery-aware localization을 분리하는 방향으로 바꿨습니다.
 
 ## 구현과 재현
 
@@ -117,6 +126,6 @@ tests/                 parser and prompt-contract tests
 
 ## 기여
 
-연구 framing, 실험 설계, baseline 선정과 감사, evaluation protocol, failure analysis와 반복 실행 체계를 설계했습니다. 외부 방법과 자체 구현의 경계는 [Third-party notices](THIRD_PARTY_NOTICES.md)에 기록했습니다.
+연구 질문, algorithm 방향, 비교 조건, evaluation target과 protocol, failure analysis를 설계했습니다. Codex를 활용해 experiment harness와 구현을 반복 수정·검증했습니다. 외부 방법과 자체 구현의 경계는 [Third-party notices](THIRD_PARTY_NOTICES.md)에 기록했습니다.
 
 [Method](docs/METHOD.md) · [Evaluation](docs/DATA_AND_EVALUATION.md) · [Results](results/README.md) · [Reproducibility](docs/REPRODUCIBILITY.md)
