@@ -9,7 +9,7 @@ description = "Training-free failure attribution for multi-agent execution traje
 readme = "README.md"
 requires-python = ">=3.11"
 authors = [
-  { name = "Chanhyuk Yoon" }
+  { name = "Chanhyeok Yoon", email = "ych1390@gmail.com" }
 ]
 
 [project.optional-dependencies]
