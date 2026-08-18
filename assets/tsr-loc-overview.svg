@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="820" viewBox="0 0 1200 820" role="img" aria-labelledby="title desc">
   <title id="title">TSR-Loc 처리 흐름과 Who&amp;When 평가 결과</title>
   <desc id="desc">과업의 성공 조건을 먼저 정하고 실행 기록에서 가장 이른 미복구 위반을 찾는 TSR-Loc의 네 단계와 정확한 단계 일치율을 보여준다.</desc>
   <defs>
@@ -7,8 +7,8 @@
     </filter>
   </defs>
 
-  <rect width="1200" height="760" rx="20" fill="#f8fafc"/>
-  <rect x="20" y="20" width="1160" height="720" rx="16" fill="#ffffff" stroke="#d9e0e7" filter="url(#shadow)"/>
+  <rect width="1200" height="820" rx="20" fill="#f8fafc"/>
+  <rect x="20" y="20" width="1160" height="780" rx="16" fill="#ffffff" stroke="#d9e0e7" filter="url(#shadow)"/>
 
   <rect x="42" y="40" width="5" height="48" rx="2.5" fill="#246b67"/>
   <text x="60" y="67" fill="#0f172a" font-family="Pretendard, Noto Sans KR, Apple SD Gothic Neo, Malgun Gothic, sans-serif" font-size="32" font-weight="800">TSR-Loc</text>
@@ -88,19 +88,25 @@
       <text x="74" y="405.1">40</text>
     </g>
 
-    <rect x="120" y="535.6" width="100" height="34.4" rx="3" fill="#a5adb8"/>
-    <rect x="300" y="407.1" width="100" height="162.9" rx="3" fill="#e43d2b"/>
-    <rect x="480" y="402.5" width="100" height="167.5" rx="3" fill="#63a5dc"/>
+    <rect x="91" y="535.6" width="68" height="34.4" rx="3" fill="#a5adb8"/>
+    <rect x="191" y="430.1" width="68" height="139.9" rx="3" fill="#8993a1"/>
+    <rect x="291" y="459.8" width="68" height="110.2" rx="3" fill="#b0b7c1"/>
+    <rect x="391" y="407.1" width="68" height="162.9" rx="3" fill="#e43d2b"/>
+    <rect x="491" y="402.5" width="68" height="167.5" rx="3" fill="#63a5dc"/>
 
     <g fill="#334155" font-size="12" font-weight="800" text-anchor="middle">
-      <text x="170" y="526">8.15</text>
-      <text x="350" y="397.5">38.59</text>
-      <text x="530" y="393">39.67</text>
+      <text x="125" y="526">8.15</text>
+      <text x="225" y="420.5">33.15</text>
+      <text x="325" y="450.2">26.09</text>
+      <text x="425" y="397.5">38.59</text>
+      <text x="525" y="393">39.67</text>
     </g>
     <g fill="#334155" font-size="12" text-anchor="middle">
-      <text x="170" y="591">Direct</text>
-      <text x="350" y="591"><tspan x="350">TSR-Loc</tspan><tspan x="350" dy="16">과업 정보만</tspan></text>
-      <text x="530" y="591"><tspan x="530">TSR-Loc</tspan><tspan x="530" dy="16">정답 보조</tspan></text>
+      <text x="125" y="591">Direct</text>
+      <text x="225" y="591">A2P</text>
+      <text x="325" y="591">ECHO</text>
+      <text x="425" y="591"><tspan x="425">TSR-Loc</tspan><tspan x="425" dy="16">과업 정보만</tspan></text>
+      <text x="525" y="591"><tspan x="525">TSR-Loc</tspan><tspan x="525" dy="16">정답 보조</tspan></text>
     </g>
   </g>
 
@@ -119,23 +125,34 @@
       <text x="652" y="411.1">30</text>
     </g>
 
-    <rect x="746" y="428.4" width="110" height="141.6" rx="3" fill="#e43d2b"/>
-    <rect x="954" y="404.8" width="110" height="165.2" rx="3" fill="#63a5dc"/>
+    <rect x="678" y="546.4" width="80" height="23.6" rx="3" fill="#8993a1"/>
+    <rect x="803" y="499.2" width="80" height="70.8" rx="3" fill="#b0b7c1"/>
+    <rect x="928" y="428.4" width="80" height="141.6" rx="3" fill="#e43d2b"/>
+    <rect x="1053" y="404.8" width="80" height="165.2" rx="3" fill="#63a5dc"/>
 
     <g fill="#334155" font-size="12" font-weight="800" text-anchor="middle">
-      <text x="801" y="418.8">26.09</text>
-      <text x="1009" y="395.2">30.43</text>
+      <text x="718" y="537">4.35</text>
+      <text x="843" y="489.6">13.04</text>
+      <text x="968" y="418.8">26.09</text>
+      <text x="1093" y="395.2">30.43</text>
     </g>
     <g fill="#334155" font-size="12" text-anchor="middle">
-      <text x="801" y="591"><tspan x="801">TSR-Loc</tspan><tspan x="801" dy="16">과업 정보만</tspan></text>
-      <text x="1009" y="591"><tspan x="1009">TSR-Loc</tspan><tspan x="1009" dy="16">정답 보조</tspan></text>
+      <text x="718" y="591">A2P</text>
+      <text x="843" y="591">ECHO</text>
+      <text x="968" y="591"><tspan x="968">TSR-Loc</tspan><tspan x="968" dy="16">과업 정보만</tspan></text>
+      <text x="1093" y="591"><tspan x="1093">TSR-Loc</tspan><tspan x="1093" dy="16">정답 보조</tspan></text>
     </g>
   </g>
 
   <line x1="42" y1="635" x2="1158" y2="635" stroke="#d9e0e7"/>
-  <rect x="42" y="662" width="5" height="45" rx="2.5" fill="#246b67"/>
-  <text x="62" y="679" fill="#0f172a" font-family="Pretendard, Noto Sans KR, Apple SD Gothic Neo, Malgun Gothic, sans-serif" font-size="15" font-weight="800">핵심 결과</text>
-  <text x="62" y="702" fill="#334155" font-family="Pretendard, Noto Sans KR, Apple SD Gothic Neo, Malgun Gothic, sans-serif" font-size="14">과업 정보만 사용한 TSR-Loc은 Direct보다 정확한 단계 일치율이 30.43%p 높았습니다.</text>
-  <text x="1145" y="702" text-anchor="end" fill="#64748b" font-family="Pretendard, Noto Sans KR, Apple SD Gothic Neo, Malgun Gothic, sans-serif" font-size="11">정답 보조 결과는 참고값</text>
-  <text x="1145" y="725" text-anchor="end" fill="#94a3b8" font-family="Pretendard, Noto Sans KR, Apple SD Gothic Neo, Malgun Gothic, sans-serif" font-size="10">출처: results/who_and_when_main.csv</text>
+  <rect x="42" y="650" width="1116" height="42" rx="8" fill="#f7f9fb"/>
+  <text x="58" y="676" fill="#475569" font-family="Pretendard, Noto Sans KR, Apple SD Gothic Neo, Malgun Gothic, sans-serif" font-size="12" font-weight="700">실행량 · GPT-4o (호출 수 · 건당 토큰)</text>
+  <text x="1142" y="676" text-anchor="end" fill="#64748b" font-family="Pretendard, Noto Sans KR, Apple SD Gothic Neo, Malgun Gothic, sans-serif" font-size="11">Direct 1 · 7.8k　|　A2P 1 · 8.1k　|　ECHO 6 · 54.6k　|　TSR Task 2 · 9.29k　|　TSR GT 2 · 9.30k</text>
+
+  <line x1="42" y1="708" x2="1158" y2="708" stroke="#d9e0e7"/>
+  <rect x="42" y="727" width="5" height="45" rx="2.5" fill="#246b67"/>
+  <text x="62" y="744" fill="#0f172a" font-family="Pretendard, Noto Sans KR, Apple SD Gothic Neo, Malgun Gothic, sans-serif" font-size="15" font-weight="800">핵심 결과</text>
+  <text x="62" y="767" fill="#334155" font-family="Pretendard, Noto Sans KR, Apple SD Gothic Neo, Malgun Gothic, sans-serif" font-size="14">과업 정보만 사용한 TSR-Loc은 Direct보다 정확한 단계 일치율이 30.43%p 높았습니다.</text>
+  <text x="1145" y="767" text-anchor="end" fill="#64748b" font-family="Pretendard, Noto Sans KR, Apple SD Gothic Neo, Malgun Gothic, sans-serif" font-size="11">A2P 대비 차이는 통계적으로 유의하지 않음 · p=0.2954</text>
+  <text x="1145" y="789" text-anchor="end" fill="#94a3b8" font-family="Pretendard, Noto Sans KR, Apple SD Gothic Neo, Malgun Gothic, sans-serif" font-size="10">출처: main 결과표와 별도 ECHO·실행량 실험 기록</text>
 </svg>
