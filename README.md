@@ -36,6 +36,8 @@
 
 처음 가설이 맞지 않았을 때 분할 방법을 계속 복잡하게 만들기보다 실패를 판정하는 기준부터 다시 정의했습니다. 최종 방법은 이 방향 전환에서 나왔습니다.
 
+![TSR-Loc의 처리 흐름과 Who&When 평가 결과](assets/tsr-loc-overview.svg)
+
 ## TSR-Loc
 
 ```mermaid
