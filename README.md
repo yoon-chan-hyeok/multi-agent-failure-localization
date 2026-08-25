@@ -4,14 +4,14 @@
 
 # TSR-Loc: Multi-Agent Failure Localization
 
-**실패한 execution trace에서 responsible agent와 earliest unrecovered step을 함께 찾습니다.**
+**과업의 성공 명세를 먼저 만든 뒤, execution trace와 대조해 earliest unrecovered failure를 찾습니다.**
 
 ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)
 ![Evaluation](https://img.shields.io/badge/Evaluation-Agent%20%2B%20Exact%20Step-7C3AED)
 ![Training](https://img.shields.io/badge/Fine--tuning-None-5B6573)
 ![CI](https://github.com/yoon-chan-hyeok/multi-agent-failure-localization/actions/workflows/ci.yml/badge.svg)
 
-[Problem](#1-problem-and-operating-setting) · [Design](#2-design-evolution) · [Method](#3-method-tsr-loc) · [Results](#5-results-whowhen) · [Quick start](#8-quick-start)
+[Problem](#1-problem-and-operating-setting) · [Core idea](#2-core-idea-trace보다-먼저-성공-과업-명세를-만든다) · [Method](#4-method-tsr-loc) · [Results](#6-results-whowhen) · [Quick start](#9-quick-start)
 
 </div>
 
@@ -31,7 +31,21 @@
 | Monitoring label | Localization 시점에는 gold failure agent와 step을 입력으로 사용하지 않습니다. |
 | Output | 자동 수정이 아니라 사람이 먼저 확인할 `(agent, step)` 후보를 반환합니다. |
 
-## 2. Design evolution
+## 2. Core idea: trace보다 먼저 성공 과업 명세를 만든다
+
+이 프로젝트의 핵심 아이디어는 로그를 더 잘게 나누는 데 있지 않습니다.
+
+> **과업이 성공하려면 지켜야 할 명세를 먼저 만들고, 실행 기록을 그 기준과 비교하면 실패 위치를 더 정확히 찾을 수 있지 않을까?**
+
+TSR-Loc은 task description과 agent 목록만 보고 `task-derived success requirements`를 먼저 작성합니다. 이 명세는 trace, reference answer와 gold failure label을 보기 전에 고정합니다. 그다음 전체 trace를 시간순으로 읽으며 어떤 requirement가 처음 깨졌는지, 이후 step에서 복구됐는지를 함께 확인합니다. 마지막까지 복구되지 않은 위반 중 가장 이른 `(agent, step)`이 최종 출력입니다.
+
+| 처음 시도한 기준 | TSR-Loc에서 바꾼 기준 |
+|---|---|
+| 긴 trace를 구간으로 나눈 뒤 의심 구간을 골랐습니다. | Trace를 보기 전에 판정 기준부터 고정합니다. |
+| 선택한 구간 안에서 눈에 띄는 오류를 찾았습니다. | 성공 명세를 기준으로 위반과 복구를 끝까지 추적합니다. |
+| 앞에서 발생했지만 이미 복구된 오류가 남을 수 있었습니다. | 복구된 위반은 제외하고 earliest unrecovered failure를 남깁니다. |
+
+## 3. Design evolution
 
 | 단계 | 판단과 결과 |
 |---|---|
@@ -46,7 +60,7 @@
 
 ![TSR-Loc의 처리 흐름과 Who&When 평가 결과](assets/tsr-loc-overview.svg)
 
-## 3. Method: TSR-Loc
+## 4. Method: TSR-Loc
 
 핵심은 trace를 먼저 잘게 나누는 것이 아니라, task가 성공하려면 지켜야 할 success requirement를 trace inspection 전에 만드는 것입니다. Requirement를 고정한 다음 전체 trace를 시간순으로 읽고, 뒤에서 복구된 위반은 제외합니다.
 
@@ -67,7 +81,7 @@ flowchart LR
 
 평가할 때는 이미 복구된 시도를 원인으로 고른 경우, 뒤늦게 나타난 증상을 고른 경우와 단계 번호가 어긋난 경우를 따로 살폈습니다. 비교 방법에도 같은 판정기를 사용했습니다.
 
-## 4. Experimental protocol
+## 5. Experimental protocol
 
 | 항목 | 설정 |
 |---|---|
@@ -80,7 +94,7 @@ flowchart LR
 
 성공 조건 337개는 두 명이 따로 검토했습니다. 유효하다고 판단한 비율은 각각 97.63%, 96.74%였고 Cohen's kappa는 0.838이었습니다.
 
-## 5. Results: Who&When
+## 6. Results: Who&When
 
 | 방법 | 책임 에이전트 정확도 | 정확한 단계 일치율 |
 |---|---:|---:|
@@ -92,7 +106,7 @@ TSR-Loc의 정확한 단계 일치율은 Direct보다 30.43%p 높았습니다. �
 
 A2P보다 정확한 단계 일치율은 5.44%p 높았지만 차이는 통계적으로 유의하지 않았습니다(`p=0.2954`). 따라서 A2P보다 우수하다고 해석하지 않았습니다. 주요 결과는 정답이나 실패 라벨 없이 과업 정보만으로 성공 조건을 만든 설정이며, 정답 보조 결과는 참고값입니다.
 
-## 6. Where it fits
+## 7. Where it fits
 
 | 적용 장면 | TSR-Loc이 제공하는 정보 |
 |---|---|
@@ -102,7 +116,7 @@ A2P보다 정확한 단계 일치율은 5.44%p 높았지만 차이는 통계적�
 
 TSR-Loc은 observability layer에서 쓸 수 있는 failure triage 방법입니다. Root cause를 형식적으로 증명하거나 agent prompt와 tool policy를 자동으로 고치지는 않습니다.
 
-## 7. Repository structure
+## 8. Repository structure
 
 ```text
 failure_attribution/   실행 방법, 모델 연결, 스키마와 평가 지표
@@ -114,7 +128,7 @@ tests/                 출력 파서와 프롬프트 규칙 테스트
 docs/                  방법, 데이터, 실험 이력과 재현 조건
 ```
 
-## 8. Quick start
+## 9. Quick start
 
 ```powershell
 python -m venv .venv
@@ -127,7 +141,7 @@ powershell -ExecutionPolicy Bypass -File scripts\run_smoke.ps1 -Python python
 
 자세한 내용은 [방법과 예시](docs/METHOD.md), [데이터와 평가 기준](docs/DATA_AND_EVALUATION.md), [실험 이력](docs/EXPERIMENT_HISTORY.md), [재현 조건](docs/REPRODUCIBILITY.md)에서 확인할 수 있습니다.
 
-## 9. Limitations
+## 10. Limitations
 
 - Who&When AG와 HC 184건에서 확인한 결과입니다. 다른 멀티에이전트 구조에 그대로 일반화하지 않습니다.
 - A2P 결과는 공개 저장소의 프롬프트와 요청 방식을 맞춘 재구현이며 원 저자의 API 실행 결과가 아닙니다.
