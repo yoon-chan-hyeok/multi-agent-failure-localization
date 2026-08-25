@@ -2,28 +2,36 @@
 
 <div align="center">
 
-# 멀티에이전트의 실패 지점 찾기
+# TSR-Loc: Multi-Agent Failure Localization
 
-**실패한 작업을 고치려면 누가, 어느 단계에서, 무엇을 놓쳤는지 먼저 알아야 합니다.**
+**실패한 execution trace에서 responsible agent와 earliest unrecovered step을 함께 찾습니다.**
 
 ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)
 ![Evaluation](https://img.shields.io/badge/Evaluation-Agent%20%2B%20Exact%20Step-7C3AED)
 ![Training](https://img.shields.io/badge/Fine--tuning-None-5B6573)
 ![CI](https://github.com/yoon-chan-hyeok/multi-agent-failure-localization/actions/workflows/ci.yml/badge.svg)
 
-[필요성](#왜-실패-위치를-찾아야-하나) · [진행 과정](#문제를-해결한-흐름) · [방법](#tsr-loc) · [결과](#whowhen-평가) · [실행](#빠르게-확인하기)
+[Problem](#1-problem-and-operating-setting) · [Design](#2-design-evolution) · [Method](#3-method-tsr-loc) · [Results](#5-results-whowhen) · [Quick start](#8-quick-start)
 
 </div>
 
-## 왜 실패 위치를 찾아야 하나
+## 1. Problem and operating setting
 
 멀티에이전트 시스템은 하나의 작업을 계획, 검색, 도구 실행과 답변 작성으로 나눠 처리합니다. 최종 답변이 틀렸을 때 결과만 보면 어느 에이전트의 어떤 행동부터 고쳐야 할지 알기 어렵습니다. 실행 기록 전체를 사람이 다시 읽는 방법도 로그가 길어질수록 부담이 커집니다.
 
 첫 오류를 찾는 것만으로도 부족합니다. 앞에서 잘못된 시도가 나왔더라도 뒤에서 바로잡혔다면 최종 실패의 원인으로 보기 어렵습니다. 반대로 마지막 단계에서 드러난 오류는 앞선 판단이 누적된 결과일 수 있습니다. 시스템을 수정하려면 책임 에이전트와 함께, 최종 실패로 이어진 가장 이른 미복구 단계를 찾아야 합니다.
 
-이 프로젝트는 실패한 멀티에이전트 실행에서 `Who`, 책임 에이전트와 `When`, 정확한 실패 단계를 함께 찾는 방법을 다룹니다.
+이 프로젝트는 실패한 multi-agent execution에서 `Who`, 책임 에이전트와 `When`, 정확한 실패 단계를 함께 찾는 방법을 다룹니다.
 
-## 문제를 해결한 흐름
+| 조건 | 가정한 상황 |
+|---|---|
+| System | Planner, tool agent, reviewer처럼 여러 agent가 하나의 task를 이어서 처리합니다. |
+| Observation | Agent와 global step이 표시된 전체 execution trace를 사후에 읽을 수 있습니다. |
+| Model access | 내부 weight나 gradient를 쓰지 않는 black-box setting입니다. |
+| Monitoring label | Localization 시점에는 gold failure agent와 step을 입력으로 사용하지 않습니다. |
+| Output | 자동 수정이 아니라 사람이 먼저 확인할 `(agent, step)` 후보를 반환합니다. |
+
+## 2. Design evolution
 
 | 단계 | 판단과 결과 |
 |---|---|
@@ -38,7 +46,9 @@
 
 ![TSR-Loc의 처리 흐름과 Who&When 평가 결과](assets/tsr-loc-overview.svg)
 
-## TSR-Loc
+## 3. Method: TSR-Loc
+
+핵심은 trace를 먼저 잘게 나누는 것이 아니라, task가 성공하려면 지켜야 할 success requirement를 trace inspection 전에 만드는 것입니다. Requirement를 고정한 다음 전체 trace를 시간순으로 읽고, 뒤에서 복구된 위반은 제외합니다.
 
 ```mermaid
 flowchart LR
@@ -57,7 +67,7 @@ flowchart LR
 
 평가할 때는 이미 복구된 시도를 원인으로 고른 경우, 뒤늦게 나타난 증상을 고른 경우와 단계 번호가 어긋난 경우를 따로 살폈습니다. 비교 방법에도 같은 판정기를 사용했습니다.
 
-### 고정한 평가 조건
+## 4. Experimental protocol
 
 | 항목 | 설정 |
 |---|---|
@@ -70,7 +80,7 @@ flowchart LR
 
 성공 조건 337개는 두 명이 따로 검토했습니다. 유효하다고 판단한 비율은 각각 97.63%, 96.74%였고 Cohen's kappa는 0.838이었습니다.
 
-## Who&When 평가
+## 5. Results: Who&When
 
 | 방법 | 책임 에이전트 정확도 | 정확한 단계 일치율 |
 |---|---:|---:|
@@ -82,7 +92,17 @@ TSR-Loc의 정확한 단계 일치율은 Direct보다 30.43%p 높았습니다. �
 
 A2P보다 정확한 단계 일치율은 5.44%p 높았지만 차이는 통계적으로 유의하지 않았습니다(`p=0.2954`). 따라서 A2P보다 우수하다고 해석하지 않았습니다. 주요 결과는 정답이나 실패 라벨 없이 과업 정보만으로 성공 조건을 만든 설정이며, 정답 보조 결과는 참고값입니다.
 
-## 저장소 구성
+## 6. Where it fits
+
+| 적용 장면 | TSR-Loc이 제공하는 정보 |
+|---|---|
+| Multi-agent regression test | 실패한 trace를 agent와 exact step 기준으로 묶어 반복되는 failure pattern을 확인할 수 있습니다. |
+| Incident triage | 긴 trace 전체를 다시 읽기 전에 수정 후보가 되는 earliest unrecovered step부터 검토할 수 있습니다. |
+| Evaluator analysis | Agent selection과 step localization을 분리해 어느 쪽에서 평가기가 흔들리는지 볼 수 있습니다. |
+
+TSR-Loc은 observability layer에서 쓸 수 있는 failure triage 방법입니다. Root cause를 형식적으로 증명하거나 agent prompt와 tool policy를 자동으로 고치지는 않습니다.
+
+## 7. Repository structure
 
 ```text
 failure_attribution/   실행 방법, 모델 연결, 스키마와 평가 지표
@@ -94,7 +114,7 @@ tests/                 출력 파서와 프롬프트 규칙 테스트
 docs/                  방법, 데이터, 실험 이력과 재현 조건
 ```
 
-## 빠르게 확인하기
+## 8. Quick start
 
 ```powershell
 python -m venv .venv
@@ -107,7 +127,7 @@ powershell -ExecutionPolicy Bypass -File scripts\run_smoke.ps1 -Python python
 
 자세한 내용은 [방법과 예시](docs/METHOD.md), [데이터와 평가 기준](docs/DATA_AND_EVALUATION.md), [실험 이력](docs/EXPERIMENT_HISTORY.md), [재현 조건](docs/REPRODUCIBILITY.md)에서 확인할 수 있습니다.
 
-## 해석 범위
+## 9. Limitations
 
 - Who&When AG와 HC 184건에서 확인한 결과입니다. 다른 멀티에이전트 구조에 그대로 일반화하지 않습니다.
 - A2P 결과는 공개 저장소의 프롬프트와 요청 방식을 맞춘 재구현이며 원 저자의 API 실행 결과가 아닙니다.
