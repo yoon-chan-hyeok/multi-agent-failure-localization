@@ -35,6 +35,17 @@ change the outcome.
 
 The strict output coordinate is the original global `(agent, step)` pair.
 
+### Evaluation conditions
+
+- **Who&When Direct:** the benchmark's all-at-once prompt without a pre-trace
+  specification.
+- **A2P repository-exact:** a prompt-level reimplementation audited against the
+  public repository commit recorded in `REPRODUCIBILITY.md`.
+- **TSR-Loc No-GT:** task-only requirement compiler followed by the full localizer;
+  this is the main method.
+- **TSR-Loc GT-assisted:** the same pipeline with reference-answer visibility in the
+  compiler; this is a reference-visibility condition.
+
 ## Worked example
 
 ```text
@@ -60,6 +71,8 @@ Attribution
   Reason = Step 2 is the earliest unrecovered violation of R1; later arithmetic
            propagates the unsupported evidence and is a downstream consequence.
 ```
+
+![Worked example](../assets/tsr_loc_worked_example_academic.png)
 
 ## Multi-View Beam Log Search
 

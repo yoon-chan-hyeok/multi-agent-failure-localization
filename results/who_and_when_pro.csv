@@ -1,0 +1,4 @@
+method,model,cases,agent_accuracy,step_accuracy,agent_step_accuracy,cohort
+Transferred-WhoAndWhen-Direct,GPT-4o,150,0.6800,0.5067,0.4133,prediction-blind-primary150
+TSR-Loc-No-GT,GPT-4o,150,0.6400,0.6800,0.5733,prediction-blind-primary150
+WhoAndWhen-Pro-Official,GPT-4o,150,0.7000,0.7000,0.6267,prediction-blind-primary150

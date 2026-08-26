@@ -81,6 +81,10 @@ flowchart LR
 
 평가할 때는 이미 복구된 시도를 원인으로 고른 경우, 뒤늦게 나타난 증상을 고른 경우와 단계 번호가 어긋난 경우를 따로 살폈습니다. 비교 방법에도 같은 판정기를 사용했습니다.
 
+아래 사례에서는 129-step trace의 마지막 오답이 아니라, 필요한 가격 정보를 처음 확보하지 못했고 이후에도 복구되지 않은 `WebSurfer, Step 4`를 찾습니다. 성공 조건을 trace보다 먼저 고정했기 때문에 뒤에 이어진 반복 시도에 판정 기준이 끌려가지 않습니다.
+
+![TSR-Loc worked example](assets/tsr_loc_worked_example_academic.png)
+
 ## 5. Experimental protocol
 
 | 항목 | 설정 |
@@ -94,6 +98,8 @@ flowchart LR
 
 성공 조건 337개는 두 명이 따로 검토했습니다. 유효하다고 판단한 비율은 각각 97.63%, 96.74%였고 Cohen's kappa는 0.838이었습니다.
 
+원 benchmark에만 맞춘 결과인지 확인하려고 MP-Bench의 다중 annotation과 Who&When Pro의 prediction-blind 150개 cohort에서도 같은 No-GT 인터페이스를 평가했습니다. HC-long 23건은 반복해서 살펴본 사후 subset이므로 장기 trace 전체에 대한 일반화 근거로 사용하지 않았습니다.
+
 ## 6. Results: Who&When
 
 | 방법 | 책임 에이전트 정확도 | 정확한 단계 일치율 |
@@ -106,6 +112,26 @@ flowchart LR
 TSR-Loc의 정확한 단계 일치율은 Direct보다 30.43%p 높았습니다. 대응표본 McNemar 검정의 p값은 `5.77e-12`였습니다.
 
 A2P보다 정확한 단계 일치율은 5.44%p 높았지만 차이는 통계적으로 유의하지 않았습니다(`p=0.2954`). 따라서 A2P보다 우수하다고 해석하지 않았습니다. ECHO와 호출·token 수치는 main CSV와 분리된 실험 집계이며 주요 결론에는 사용하지 않았습니다. 주요 결과는 정답이나 실패 라벨 없이 과업 정보만으로 성공 조건을 만든 설정이며, 정답 보조 결과는 참고값입니다.
+
+![TSR-Loc 전체 결과 요약](assets/tsr_loc_results_at_glance.png)
+
+### 외부 benchmark에서도 같은 인터페이스를 적용했습니다
+
+| Who&When Pro, 150건 | Agent | Step | Agent-Step |
+|---|---:|---:|---:|
+| 기존 Who&When prompt 전이 | 68.00% | 50.67% | 41.33% |
+| **TSR-Loc, No-GT** | 64.00% | 68.00% | 57.33% |
+| Pro 전용 공식 prompt | **70.00%** | **70.00%** | **62.67%** |
+
+TSR-Loc은 기존 Who&When prompt를 그대로 옮긴 조건보다 Step에서 17.33%p, Agent-Step에서 16.00%p 높았습니다. 다만 Pro 전용 prompt가 수치상 더 높았으므로 Pro SOTA가 아니라, 새 framework와 task에서도 실패 단계 판정 방식이 유지되는지를 본 전이 결과로 해석했습니다.
+
+MP-Bench Automatic 120건에서는 Step-Any가 Direct 67.50%에서 TSR-Loc 83.33%로, Role-Any가 27.50%에서 83.33%로 바뀌었습니다. 여러 전문가 중 한 명의 attribution과 일치하는지를 본 지표이며, 원 benchmark의 평가 시스템을 재현했다는 뜻은 아닙니다.
+
+### 병목은 requirement 생성보다 trace localization에 가까웠습니다
+
+![Requirement compiler와 localizer의 2×2 비교](assets/tsr_loc_model_allocation_flow.png)
+
+같은 No-GT 조건에서 compiler와 localizer를 Llama-3.1-8B와 GPT-4o로 교차했습니다. Compiler만 바꾼 차이는 0.54~1.09%p였고, localizer를 바꾼 차이는 19.02~19.57%p였습니다. 이 model pair에서는 성공 조건을 만드는 단계보다 긴 trace에서 정확한 시간 경계를 고르는 단계가 성능에 더 민감했습니다. 경량 compiler가 통계적으로 동등하다는 주장은 하지 않습니다.
 
 ## 7. Where it fits
 
@@ -127,6 +153,7 @@ results/               검증한 집계 결과표
 scripts/               결과 점검과 보고서 생성 도구
 tests/                 출력 파서와 프롬프트 규칙 테스트
 docs/                  방법, 데이터, 실험 이력과 재현 조건
+assets/                처리 예시와 검증 결과 그림
 ```
 
 ## 9. Quick start
@@ -144,9 +171,11 @@ powershell -ExecutionPolicy Bypass -File scripts\run_smoke.ps1 -Python python
 
 ## 10. Limitations
 
-- Who&When AG와 HC 184건에서 확인한 결과입니다. 다른 멀티에이전트 구조에 그대로 일반화하지 않습니다.
+- 주 결과는 Who&When AG와 HC 184건에서 얻었습니다. MP-Bench와 Who&When Pro 결과는 외부 전이 확인이며 실제 운영 장애 전체로 일반화하지 않습니다.
 - A2P 결과는 공개 저장소의 프롬프트와 요청 방식을 맞춘 재구현이며 원 저자의 API 실행 결과가 아닙니다.
 - ECHO와 호출·토큰 수치는 별도로 수행한 비교 실험의 집계값입니다.
+- HC-long은 23건의 사후 subset입니다. 장기 trace 전반의 SOTA 근거로 사용하지 않습니다.
+- Who&When Pro는 공개된 injected failure trace의 prediction-blind cohort입니다. Pro 전용 공식 prompt보다 우수하다고 주장하지 않습니다.
 - TSR-Loc은 실패를 점검할 후보 위치를 찾습니다. 형식적인 인과관계를 증명하거나 시스템을 자동으로 고치지는 않습니다.
 - 로그 분할 실험은 탐색 과정으로 남겼습니다. 모든 조건에서 분할이 효과적이었다고 주장하지 않습니다.
 - 유료 API 키, 전체 벤치마크 데이터, 원시 예측 로그와 모델 체크포인트는 공개하지 않았습니다.

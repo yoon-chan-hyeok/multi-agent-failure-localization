@@ -17,8 +17,7 @@
 - full benchmark data;
 - multi-gigabyte raw prediction directories;
 - model checkpoints;
-- Who&When Pro results, because a usable public release was not available during the
-  project;
+- redistributable copies of Who&When Pro or MP-Bench benchmark records;
 - native TraceElephant full-observability benchmark results.
 
 ## Main run controls
@@ -41,6 +40,10 @@
 - Matched requirement-block controls were directionally positive but not significant.
 - Human evaluation covered 337 generated requirements: 97.63% and 96.74% validity by
   two raters, Cohen's kappa `0.838`.
+- On the prediction-blind Who&When Pro primary cohort (`n=150`), TSR-Loc No-GT
+  improved step accuracy by `17.33 pp` and joint agent-step accuracy by `16.00 pp`
+  over the transferred original Who&When interface. It did not outperform the
+  Pro-specific official prompt.
 
 ## Execution safeguards
 

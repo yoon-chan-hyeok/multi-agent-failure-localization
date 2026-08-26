@@ -8,6 +8,7 @@ artifacts. They are presentation tables, not substitutes for case-level predicti
 | `who_and_when_main.csv` | Main GPT-4o comparison on all 184 Who&When cases and the exploratory HC-long slice |
 | `model_factorial_2x2.csv` | Llama/GPT requirement-compiler × localizer experiment |
 | `external_transfer.csv` | MP-Bench Manual, Automatic, and MAST-source evaluation |
+| `who_and_when_pro.csv` | Prediction-blind Who&When Pro primary-150 transfer comparison |
 
 ## Interpretation rules
 
@@ -19,6 +20,9 @@ artifacts. They are presentation tables, not substitutes for case-level predicti
   commit `7953d780c85054721a7b4bf246bcf60a16bb28af`, not the authors' original API run.
 - MP-Bench `agent_or_role_any` uses benchmark-dependent role/agent matching; compare
   conditions within the same split.
+- Who&When Pro reports agent, step, and joint agent-step accuracy. The transferred
+  Direct condition uses the original Who&When interface, while `Pro-Official` uses
+  the benchmark-specific prompt.
 
 The full interpretation and claim boundaries are documented in
 [../docs/REPRODUCIBILITY.md](../docs/REPRODUCIBILITY.md).

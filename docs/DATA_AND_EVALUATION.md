@@ -28,8 +28,9 @@ starting from `data.generated_step_base` in the TOML configuration.
 | Who&When AG | 126 | 5 to 10 | named agent, exact step, reason |
 | Who&When HC | 58 | 5 to 130 | canonical agent, exact step, reason |
 | MP-Bench Automatic | 120 | 5 to 10 | multiple agent/step annotations |
-| MP-Bench Manual | 169 | 5 to 130 | multiple agent/step annotations |
-| TraceElephant compact | 218 | 5 to 94 | responsible actor, failure boundary |
+| MP-Bench Manual-positive | 157 | variable | multiple agent/step annotations |
+| MP-Bench MAST-source | 100 | variable | multiple agent/step annotations |
+| Who&When Pro primary cohort | 150 | variable | agent, step, and error labels |
 
 The commonly reported HC-long slice contains 23 Who&When HC trajectories with more
 than 50 steps. It is a repeatedly inspected post-hoc slice.
@@ -58,4 +59,7 @@ Joint agent-step-error accuracy is not the primary metric in this repository.
   Who&When's earliest decisive agent action.
 - MP-Bench supports several human attributions, so deterministic top-1 evaluation is
   accompanied by Any/Majority/Unanimous metrics.
+- The Who&When Pro cohort was fixed before prediction and spans 128 task clusters,
+  5 MAS frameworks, and 9 task benchmarks. Results are reported against both the
+  transferred original Who&When interface and the Pro-specific official prompt.
 
