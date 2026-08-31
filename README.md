@@ -11,17 +11,17 @@
 ![Training](https://img.shields.io/badge/Fine--tuning-None-5B6573)
 ![CI](https://github.com/yoon-chan-hyeok/multi-agent-failure-localization/actions/workflows/ci.yml/badge.svg)
 
-[Problem](#1-problem-and-operating-setting) · [Core idea](#2-core-idea-trace보다-먼저-성공-과업-명세를-만든다) · [Method](#4-method-tsr-loc) · [Results](#6-results-whowhen) · [Quick start](#9-quick-start)
+[문제](#1-왜-실패-위치까지-찾아야-하는가) · [아이디어](#2-아이디어의-출발점-성공-명세를-trace보다-먼저-만든다) · [방법](#4-tsr-loc은-어떻게-찾는가) · [결과](#6-검증-결과) · [활용](#7-운영에서-어떻게-쓰는가) · [실행](#9-실행-방법)
 
 </div>
 
-## 1. Problem and operating setting
+## 1. 왜 실패 위치까지 찾아야 하는가
 
-멀티에이전트 시스템은 하나의 작업을 계획, 검색, 도구 실행과 답변 작성으로 나눠 처리합니다. 최종 답변이 틀렸을 때 결과만 보면 어느 에이전트의 어떤 행동부터 고쳐야 할지 알기 어렵습니다. 실행 기록 전체를 사람이 다시 읽는 방법도 로그가 길어질수록 부담이 커집니다.
+멀티에이전트 시스템은 하나의 작업을 계획, 검색, 도구 실행과 답변 작성으로 나눠 처리합니다. 최종 답변의 성공 여부만으로는 어느 에이전트의 어떤 행동부터 고쳐야 할지 알기 어렵습니다. 로그 전체를 사람이 다시 읽는 방법도 실행이 길어질수록 부담이 커집니다.
 
-첫 오류를 찾는 것만으로도 부족합니다. 앞에서 잘못된 시도가 나왔더라도 뒤에서 바로잡혔다면 최종 실패의 원인으로 보기 어렵습니다. 반대로 마지막 단계에서 드러난 오류는 앞선 판단이 누적된 결과일 수 있습니다. 시스템을 수정하려면 책임 에이전트와 함께, 최종 실패로 이어진 가장 이른 미복구 단계를 찾아야 합니다.
+처음 나타난 오류를 고르는 것만으로도 부족합니다. 앞의 잘못된 시도가 뒤에서 바로잡혔다면 최종 실패와 직접 연결하기 어렵습니다. 반대로 마지막 단계에서 보인 오류는 앞선 판단이 누적된 결과일 수 있습니다. 회귀 테스트나 장애 분석에서 필요한 정보는 책임 에이전트와 함께, 최종 실패로 이어진 가장 이른 미복구 단계입니다.
 
-이 프로젝트는 실패한 multi-agent execution에서 `Who`, 책임 에이전트와 `When`, 정확한 실패 단계를 함께 찾는 방법을 다룹니다.
+이 프로젝트는 실패한 multi-agent execution에서 `Who`, 책임 에이전트와 `When`, 정확한 실패 단계를 함께 찾는 TSR-Loc을 제안하고 검증합니다.
 
 | 조건 | 가정한 상황 |
 |---|---|
@@ -29,15 +29,15 @@
 | Observation | Agent와 global step이 표시된 전체 execution trace를 사후에 읽을 수 있습니다. |
 | Model access | 내부 weight나 gradient를 쓰지 않는 black-box setting입니다. |
 | Monitoring label | Localization 시점에는 gold failure agent와 step을 입력으로 사용하지 않습니다. |
-| Output | 자동 수정이 아니라 사람이 먼저 확인할 `(agent, step)` 후보를 반환합니다. |
+| Output | 자동 수정 대신 사람이 먼저 확인할 `(agent, step)` 후보를 반환합니다. |
 
-## 2. Core idea: trace보다 먼저 성공 과업 명세를 만든다
+## 2. 아이디어의 출발점: 성공 명세를 trace보다 먼저 만든다
 
-이 프로젝트의 핵심 아이디어는 로그를 더 잘게 나누는 데 있지 않습니다.
+처음에는 긴 로그를 잘 나누면 실패 위치를 찾기 쉬울 것이라고 생각했습니다. 하지만 구간을 작게 나누면 원인과 복구 과정이 갈라지고, 크게 나누면 다시 긴 문맥을 판정해야 했습니다. 여기서 질문을 바꿨습니다.
 
 > **과업이 성공하려면 지켜야 할 명세를 먼저 만들고, 실행 기록을 그 기준과 비교하면 실패 위치를 더 정확히 찾을 수 있지 않을까?**
 
-TSR-Loc은 task description과 agent 목록만 보고 `task-derived success requirements`를 먼저 작성합니다. 이 명세는 trace, reference answer와 gold failure label을 보기 전에 고정합니다. 그다음 전체 trace를 시간순으로 읽으며 어떤 requirement가 처음 깨졌는지, 이후 step에서 복구됐는지를 함께 확인합니다. 마지막까지 복구되지 않은 위반 중 가장 이른 `(agent, step)`이 최종 출력입니다.
+TSR-Loc은 task description과 agent 목록만 보고 `task-derived success requirements`를 작성합니다. 이 명세는 trace, reference answer와 gold failure label을 보기 전에 고정합니다. 그다음 전체 trace를 시간순으로 읽으며 requirement 위반과 이후 복구 여부를 함께 확인합니다. 마지막까지 복구되지 않은 위반 중 가장 이른 `(agent, step)`을 반환합니다.
 
 | 처음 시도한 기준 | TSR-Loc에서 바꾼 기준 |
 |---|---|
@@ -45,7 +45,7 @@ TSR-Loc은 task description과 agent 목록만 보고 `task-derived success requ
 | 선택한 구간 안에서 눈에 띄는 오류를 찾았습니다. | 성공 명세를 기준으로 위반과 복구를 끝까지 추적합니다. |
 | 앞에서 발생했지만 이미 복구된 오류가 남을 수 있었습니다. | 복구된 위반은 제외하고 earliest unrecovered failure를 남깁니다. |
 
-## 3. Design evolution
+## 3. 분할 실험에서 성공 명세로
 
 | 단계 | 판단과 결과 |
 |---|---|
@@ -56,13 +56,13 @@ TSR-Loc은 task description과 agent 목록만 보고 `task-derived success requ
 | 최종 방법 | 실행 기록을 보기 전에 성공 조건을 고정하고, 처음 위반한 뒤 끝까지 복구하지 못한 지점을 찾는 TSR-Loc을 만들었습니다. |
 | 평가 | Who&When 184개 실행에서 Direct의 정확한 단계 일치율 8.15%를 38.59%로 높였습니다. |
 
-처음 가설이 맞지 않았을 때 분할 방법을 계속 복잡하게 만들기보다 실패를 판정하는 기준부터 다시 정의했습니다. 최종 방법은 이 방향 전환에서 나왔습니다.
+분할 방법을 계속 복잡하게 만드는 대신, 실패를 판정할 기준이 먼저 필요하다고 봤습니다. TSR-Loc은 이 방향 전환에서 나온 방법입니다.
 
 ![TSR-Loc의 처리 흐름과 Who&When 평가 결과](assets/tsr-loc-overview.svg)
 
-## 4. Method: TSR-Loc
+## 4. TSR-Loc은 어떻게 찾는가
 
-핵심은 trace를 먼저 잘게 나누는 것이 아니라, task가 성공하려면 지켜야 할 success requirement를 trace inspection 전에 만드는 것입니다. Requirement를 고정한 다음 전체 trace를 시간순으로 읽고, 뒤에서 복구된 위반은 제외합니다.
+Task가 성공하려면 지켜야 할 requirement를 trace inspection 전에 만들고 고정합니다. 그다음 전체 trace를 시간순으로 읽고, 뒤에서 복구된 위반은 제외합니다.
 
 ```mermaid
 flowchart LR
@@ -85,7 +85,7 @@ flowchart LR
 
 ![TSR-Loc worked example](assets/tsr_loc_worked_example_academic.png)
 
-## 5. Experimental protocol
+## 5. 평가 설계: label은 채점에만 사용
 
 | 항목 | 설정 |
 |---|---|
@@ -96,11 +96,11 @@ flowchart LR
 | 주요 실행 모델 | GPT-4o, temperature 0.0 |
 | 평가 | 책임 에이전트 정확도와 정확한 단계 일치율을 분리해 계산 |
 
-성공 조건 337개는 두 명이 따로 검토했습니다. 유효하다고 판단한 비율은 각각 97.63%, 96.74%였고 Cohen's kappa는 0.838이었습니다.
+Localization 단계에서는 정답과 failure label을 입력으로 사용하지 않았습니다. Label은 예측이 끝난 뒤 책임 에이전트와 정확한 단계가 맞았는지 채점할 때만 사용했습니다. 성공 조건 337개는 두 명이 따로 검토했습니다. 유효하다고 판단한 비율은 각각 97.63%, 96.74%였고 Cohen's kappa는 0.838이었습니다.
 
 원 benchmark에만 맞춘 결과인지 확인하려고 MP-Bench의 다중 annotation과 Who&When Pro의 prediction-blind 150개 cohort에서도 같은 No-GT 인터페이스를 평가했습니다. HC-long 23건은 반복해서 살펴본 사후 subset이므로 장기 trace 전체에 대한 일반화 근거로 사용하지 않았습니다.
 
-## 6. Results: Who&When
+## 6. 검증 결과
 
 | 방법 | 책임 에이전트 정확도 | 정확한 단계 일치율 |
 |---|---:|---:|
@@ -133,7 +133,7 @@ MP-Bench Automatic 120건에서는 Step-Any가 Direct 67.50%에서 TSR-Loc 83.33
 
 같은 No-GT 조건에서 compiler와 localizer를 Llama-3.1-8B와 GPT-4o로 교차했습니다. Compiler만 바꾼 차이는 0.54~1.09%p였고, localizer를 바꾼 차이는 19.02~19.57%p였습니다. 이 model pair에서는 성공 조건을 만드는 단계보다 긴 trace에서 정확한 시간 경계를 고르는 단계가 성능에 더 민감했습니다. 경량 compiler가 통계적으로 동등하다는 주장은 하지 않습니다.
 
-## 7. Where it fits
+## 7. 운영에서 어떻게 쓰는가
 
 | 적용 장면 | TSR-Loc이 제공하는 정보 |
 |---|---|
@@ -141,9 +141,9 @@ MP-Bench Automatic 120건에서는 Step-Any가 Direct 67.50%에서 TSR-Loc 83.33
 | Incident triage | 긴 trace 전체를 다시 읽기 전에 수정 후보가 되는 earliest unrecovered step부터 검토할 수 있습니다. |
 | Evaluator analysis | Agent selection과 step localization을 분리해 어느 쪽에서 평가기가 흔들리는지 볼 수 있습니다. |
 
-TSR-Loc은 observability layer에서 쓸 수 있는 failure triage 방법입니다. Root cause를 형식적으로 증명하거나 agent prompt와 tool policy를 자동으로 고치지는 않습니다.
+TSR-Loc은 observability layer에서 실패 trace의 검토 시작점을 정하는 방법입니다. Root cause를 형식적으로 증명하거나 agent prompt와 tool policy를 자동으로 고치지는 않습니다.
 
-## 8. Repository structure
+## 8. 저장소 구성
 
 ```text
 failure_attribution/   TSR-Loc, baseline·ablation, 모델 연결, 스키마와 평가 지표
@@ -156,7 +156,7 @@ docs/                  방법, 데이터, 실험 이력과 재현 조건
 assets/                처리 예시와 검증 결과 그림
 ```
 
-## 9. Quick start
+## 9. 실행 방법
 
 ```powershell
 python -m venv .venv
@@ -169,7 +169,7 @@ powershell -ExecutionPolicy Bypass -File scripts\run_smoke.ps1 -Python python
 
 자세한 내용은 [방법과 예시](docs/METHOD.md), [데이터와 평가 기준](docs/DATA_AND_EVALUATION.md), [실험 이력](docs/EXPERIMENT_HISTORY.md), [재현 조건](docs/REPRODUCIBILITY.md)에서 확인할 수 있습니다.
 
-## 10. Limitations
+## 10. 해석 범위와 한계
 
 - 주 결과는 Who&When AG와 HC 184건에서 얻었습니다. MP-Bench와 Who&When Pro 결과는 외부 전이 확인이며 실제 운영 장애 전체로 일반화하지 않습니다.
 - A2P 결과는 공개 저장소의 프롬프트와 요청 방식을 맞춘 재구현이며 원 저자의 API 실행 결과가 아닙니다.
