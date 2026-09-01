@@ -98,6 +98,8 @@ flowchart LR
 
 Localization 단계에서는 정답과 failure label을 입력으로 사용하지 않았습니다. Label은 예측이 끝난 뒤 책임 에이전트와 정확한 단계가 맞았는지 채점할 때만 사용했습니다. 성공 조건 337개는 두 명이 따로 검토했습니다. 유효하다고 판단한 비율은 각각 97.63%, 96.74%였고 Cohen's kappa는 0.838이었습니다.
 
+책임 agent를 맞혀도 action 위치를 모르면 trace를 다시 읽어야 하고, step만 맞혀도 다른 agent를 고르면 수정 대상이 달라집니다. 그래서 두 정확도를 하나로 합치지 않고 따로 보고했습니다.
+
 원 benchmark에만 맞춘 결과인지 확인하려고 MP-Bench의 다중 annotation과 Who&When Pro의 prediction-blind 150개 cohort에서도 같은 No-GT 인터페이스를 평가했습니다. HC-long 23건은 반복해서 살펴본 사후 subset이므로 장기 trace 전체에 대한 일반화 근거로 사용하지 않았습니다.
 
 ## 6. 검증 결과
@@ -111,7 +113,7 @@ Localization 단계에서는 정답과 failure label을 입력으로 사용하�
 
 TSR-Loc의 정확한 단계 일치율은 Direct보다 30.43%p 높았습니다. 대응표본 McNemar 검정의 p값은 `5.77e-12`였습니다.
 
-A2P보다 정확한 단계 일치율은 5.44%p 높았지만 차이는 통계적으로 유의하지 않았습니다(`p=0.2954`). 따라서 A2P보다 우수하다고 해석하지 않았습니다. ECHO와 호출·token 수치는 main CSV와 분리된 실험 집계이며 주요 결론에는 사용하지 않았습니다. 주요 결과는 정답이나 실패 라벨 없이 과업 정보만으로 성공 조건을 만든 설정이며, 정답 보조 결과는 참고값입니다.
+A2P보다 정확한 단계 일치율은 5.44%p 높았지만 차이는 통계적으로 유의하지 않았습니다(`p=0.2954`). 따라서 A2P보다 우수하다고 해석하지 않았습니다. ECHO와 호출·token 수치는 main result와 분리된 실험 집계이며 주요 결론에는 사용하지 않았습니다. 주요 비교값은 [who_and_when_main.csv](results/who_and_when_main.csv), ECHO와 실행량은 [echo_and_cost_summary.csv](results/echo_and_cost_summary.csv)에 나눠 공개했습니다. 정답이나 실패 라벨 없이 성공 조건을 만든 No-GT 설정이 주 결과이며, 정답 보조 결과는 참고값입니다.
 
 ![TSR-Loc 전체 결과 요약](assets/tsr_loc_results_at_glance.png)
 
