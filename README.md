@@ -1,10 +1,8 @@
-![TSR-Loc](assets/project-hero.svg)
-
 <div align="center">
 
 # TSR-Loc: Multi-Agent Failure Localization
 
-**과업의 성공 명세를 먼저 만든 뒤, execution trace와 대조해 earliest unrecovered failure를 찾습니다.**
+**멀티에이전트 작업이 실패했을 때, 어떤 에이전트의 어느 행동부터 확인해야 하는지 찾는 연구입니다.**
 
 ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)
 ![Evaluation](https://img.shields.io/badge/Evaluation-Agent%20%2B%20Exact%20Step-7C3AED)
@@ -15,13 +13,15 @@
 
 </div>
 
+실패한 작업의 로그가 길면 마지막 오답만으로 수정할 곳을 알기 어렵습니다. TSR-Loc은 **과업이 성공하려면 지켜야 할 명세를 먼저 만들고, 로그를 그 명세와 대조**합니다. 뒤에서 복구된 실수는 제외하고, 끝까지 남은 위반 중 가장 이른 에이전트와 단계를 제시합니다. 회귀 테스트나 장애 분석에서 사람이 검토를 시작할 위치를 정하는 데 활용할 수 있습니다.
+
+Who&When의 실패 실행 184건에서, 정답 단계와 정확히 일치한 비율은 전체 로그를 한 번에 판정하는 Direct의 8.15%에서 TSR-Loc의 38.59%로 높아졌습니다. A2P 재구현과의 차이는 통계적으로 유의하지 않았습니다. 이 결과를 바탕으로 성공 명세 생성과 실패 위치 판정을 나눈 방식의 가능성과 한계를 검토했습니다.
+
 ## 1. 왜 실패 위치까지 찾아야 하는가
 
-멀티에이전트 시스템은 하나의 작업을 계획, 검색, 도구 실행과 답변 작성으로 나눠 처리합니다. 최종 답변의 성공 여부만으로는 어느 에이전트의 어떤 행동부터 고쳐야 할지 알기 어렵습니다. 로그 전체를 사람이 다시 읽는 방법도 실행이 길어질수록 부담이 커집니다.
+멀티에이전트 시스템에서는 계획, 검색, 도구 실행과 답변 작성이 여러 에이전트에 걸쳐 이어집니다. 한 에이전트가 잘못된 근거를 가져오면 뒤의 에이전트가 정확하게 계산하더라도 최종 답은 틀릴 수 있습니다. 반대로 앞의 잘못된 시도를 뒤에서 바로잡기도 합니다.
 
-처음 나타난 오류를 고르는 것만으로도 부족합니다. 앞의 잘못된 시도가 뒤에서 바로잡혔다면 최종 실패와 직접 연결하기 어렵습니다. 반대로 마지막 단계에서 보인 오류는 앞선 판단이 누적된 결과일 수 있습니다. 회귀 테스트나 장애 분석에서 필요한 정보는 책임 에이전트와 함께, 최종 실패로 이어진 가장 이른 미복구 단계입니다.
-
-이 프로젝트는 실패한 multi-agent execution에서 `Who`, 책임 에이전트와 `When`, 정확한 실패 단계를 함께 찾는 TSR-Loc을 제안하고 검증합니다.
+따라서 눈에 띄는 첫 오류나 마지막 오답을 고르는 것만으로는 부족합니다. 최종 실패로 이어진 가장 이른 미복구 단계(earliest unrecovered failure)를 찾고, 해당 에이전트를 함께 반환하도록 문제를 정했습니다.
 
 | 조건 | 가정한 상황 |
 |---|---|
@@ -33,36 +33,19 @@
 
 ## 2. 아이디어의 출발점: 성공 명세를 trace보다 먼저 만든다
 
-처음에는 긴 로그를 잘 나누면 실패 위치를 찾기 쉬울 것이라고 생각했습니다. 하지만 구간을 작게 나누면 원인과 복구 과정이 갈라지고, 크게 나누면 다시 긴 문맥을 판정해야 했습니다. 여기서 질문을 바꿨습니다.
-
 > **과업이 성공하려면 지켜야 할 명세를 먼저 만들고, 실행 기록을 그 기준과 비교하면 실패 위치를 더 정확히 찾을 수 있지 않을까?**
 
-TSR-Loc은 task description과 agent 목록만 보고 `task-derived success requirements`를 작성합니다. 이 명세는 trace, reference answer와 gold failure label을 보기 전에 고정합니다. 그다음 전체 trace를 시간순으로 읽으며 requirement 위반과 이후 복구 여부를 함께 확인합니다. 마지막까지 복구되지 않은 위반 중 가장 이른 `(agent, step)`을 반환합니다.
-
-| 처음 시도한 기준 | TSR-Loc에서 바꾼 기준 |
-|---|---|
-| 긴 trace를 구간으로 나눈 뒤 의심 구간을 골랐습니다. | Trace를 보기 전에 판정 기준부터 고정합니다. |
-| 선택한 구간 안에서 눈에 띄는 오류를 찾았습니다. | 성공 명세를 기준으로 위반과 복구를 끝까지 추적합니다. |
-| 앞에서 발생했지만 이미 복구된 오류가 남을 수 있었습니다. | 복구된 위반은 제외하고 earliest unrecovered failure를 남깁니다. |
+TSR-Loc은 task description과 agent 목록만 보고 `task-derived success requirements`를 작성합니다. 이 명세는 trace, reference answer와 gold failure label을 보기 전에 고정합니다. 실행 결과를 이미 본 상태에서 실패 이유에 맞춰 기준을 만드는 일을 피하려는 설계입니다. 그다음 전체 trace를 시간순으로 읽으며 requirement 위반과 이후 복구 여부를 함께 확인합니다.
 
 ## 3. 분할 실험에서 성공 명세로
 
-| 단계 | 판단과 결과 |
-|---|---|
-| 문제 정의 | 책임 에이전트와 정확한 결정적 실패 단계를 함께 찾아야 한다고 봤습니다. |
-| 첫 접근 | 긴 로그가 원인이라고 생각해 고정 분할, 적응형 분할, 상위 구간 재검토와 재정렬을 비교했습니다. |
-| 확인한 한계 | 작은 구간은 원인과 복구 과정을 갈라놓고, 큰 구간은 긴 문맥 문제로 돌아갔습니다. 구간 크기에 따라 성능도 흔들렸습니다. |
-| 문제 재정의 | 로그를 어떻게 자를지보다 과업이 성공하려면 무엇을 끝까지 지켜야 하는지를 먼저 정하기로 했습니다. |
-| 최종 방법 | 실행 기록을 보기 전에 성공 조건을 고정하고, 처음 위반한 뒤 끝까지 복구하지 못한 지점을 찾는 TSR-Loc을 만들었습니다. |
-| 평가 | Who&When 184개 실행에서 Direct의 정확한 단계 일치율 8.15%를 38.59%로 높였습니다. |
+처음에는 긴 로그를 나누면 실패 위치를 찾기 쉬울 것이라고 생각해 고정·적응형 분할, 상위 구간 재검토와 재정렬을 비교했습니다. 하지만 작은 구간은 원인과 복구 과정을 갈라놓고, 큰 구간은 다시 긴 문맥을 판정해야 했습니다. 구간 크기와 검토할 후보 수를 바꿔도 정확한 단계 일치율이 일관되게 좋아지지 않았습니다.
 
-분할 방법을 계속 복잡하게 만드는 대신, 실패를 판정할 기준이 먼저 필요하다고 봤습니다. TSR-Loc은 이 방향 전환에서 나온 방법입니다.
-
-![TSR-Loc의 처리 흐름과 Who&When 평가 결과](assets/tsr-loc-overview.svg)
+이 결과를 보고, 로그를 나누기 전에 실패 판정의 기준부터 정하기로 했습니다. 분할 실험의 설정과 수치는 [실험 이력](docs/EXPERIMENT_HISTORY.md)에 남겼습니다.
 
 ## 4. TSR-Loc은 어떻게 찾는가
 
-Task가 성공하려면 지켜야 할 requirement를 trace inspection 전에 만들고 고정합니다. 그다음 전체 trace를 시간순으로 읽고, 뒤에서 복구된 위반은 제외합니다.
+TSR-Loc은 requirement compiler와 trace localizer의 두 단계로 실행됩니다. 별도 fine-tuning 없이 LLM을 두 번 호출하며, localizer는 원래 로그의 global step 번호를 유지합니다.
 
 ```mermaid
 flowchart LR
@@ -73,11 +56,6 @@ flowchart LR
     L --> A["책임 에이전트"]
     L --> S["가장 이른 미복구 단계"]
 ```
-
-1. 실행 기록을 보기 전에 과업 설명만으로 성공 조건을 만듭니다.
-2. 조건을 고정한 뒤 실행 기록을 시간순으로 읽습니다.
-3. 각 위반이 뒤에서 복구됐는지 확인합니다.
-4. 끝까지 남은 위반 가운데 가장 이른 단계와 해당 에이전트를 반환합니다.
 
 평가할 때는 이미 복구된 시도를 원인으로 고른 경우, 뒤늦게 나타난 증상을 고른 경우와 단계 번호가 어긋난 경우를 따로 살폈습니다. 비교 방법에도 같은 판정기를 사용했습니다.
 
@@ -90,19 +68,21 @@ flowchart LR
 | 항목 | 설정 |
 |---|---|
 | 데이터 | Who&When AG 126건 + HC 58건, 총 184건 |
-| 입력 | 과업 설명과 단계 번호가 붙은 전체 실행 기록 |
+| 입력 | 과업 설명, agent 목록과 단계 번호가 붙은 전체 실행 기록 |
 | TSR-Loc 성공 조건 | 실행 기록, 정답, 실패 라벨을 보기 전에 생성하고 고정 |
 | 비교 방법 | Direct, A2P와 ECHO |
-| 주요 실행 모델 | GPT-4o, temperature 0.0 |
+| 주요 실행 모델 | GPT-4o. TSR-Loc temperature는 0.0, A2P는 원 저장소 요청 방식에 맞춰 temperature 필드를 생략 |
 | 평가 | 책임 에이전트 정확도와 정확한 단계 일치율을 분리해 계산 |
 
 Localization 단계에서는 정답과 failure label을 입력으로 사용하지 않았습니다. Label은 예측이 끝난 뒤 책임 에이전트와 정확한 단계가 맞았는지 채점할 때만 사용했습니다. 성공 조건 337개는 두 명이 따로 검토했습니다. 유효하다고 판단한 비율은 각각 97.63%, 96.74%였고 Cohen's kappa는 0.838이었습니다.
 
 책임 agent를 맞혀도 action 위치를 모르면 trace를 다시 읽어야 하고, step만 맞혀도 다른 agent를 고르면 수정 대상이 달라집니다. 그래서 두 정확도를 하나로 합치지 않고 따로 보고했습니다.
 
-원 benchmark에만 맞춘 결과인지 확인하려고 MP-Bench의 다중 annotation과 Who&When Pro의 prediction-blind 150개 cohort에서도 같은 No-GT 인터페이스를 평가했습니다. HC-long 23건은 반복해서 살펴본 사후 subset이므로 장기 trace 전체에 대한 일반화 근거로 사용하지 않았습니다.
+원 benchmark에만 맞춘 결과인지 확인하려고 MP-Bench의 다중 annotation과 Who&When Pro에서도 같은 No-GT 인터페이스를 평가했습니다. Pro는 예측을 보기 전에 고정한 150건의 cohort입니다. HC-long 23건은 반복해서 살펴본 사후 subset이므로 장기 trace 전체에 대한 일반화 근거로 사용하지 않았습니다.
 
 ## 6. 검증 결과
+
+책임 에이전트 정확도는 agent 이름의 일치율, 정확한 단계 일치율은 원래 로그의 global step 번호 일치율입니다. 아래 두 수치는 각각 채점하며, agent와 step을 동시에 맞힌 비율은 아닙니다.
 
 | 방법 | 책임 에이전트 정확도 | 정확한 단계 일치율 |
 |---|---:|---:|
@@ -115,7 +95,7 @@ TSR-Loc의 정확한 단계 일치율은 Direct보다 30.43%p 높았습니다. �
 
 A2P보다 정확한 단계 일치율은 5.44%p 높았지만 차이는 통계적으로 유의하지 않았습니다(`p=0.2954`). 따라서 A2P보다 우수하다고 해석하지 않았습니다. ECHO와 호출·token 수치는 main result와 분리된 실험 집계이며 주요 결론에는 사용하지 않았습니다. 주요 비교값은 [who_and_when_main.csv](results/who_and_when_main.csv), ECHO와 실행량은 [echo_and_cost_summary.csv](results/echo_and_cost_summary.csv)에 나눠 공개했습니다. 정답이나 실패 라벨 없이 성공 조건을 만든 No-GT 설정이 주 결과이며, 정답 보조 결과는 참고값입니다.
 
-![TSR-Loc 전체 결과 요약](assets/tsr_loc_results_at_glance.png)
+![TSR-Loc의 처리 흐름과 Who&When 평가 결과](assets/tsr-loc-overview.svg)
 
 ### 외부 benchmark에서도 같은 인터페이스를 적용했습니다
 
@@ -127,7 +107,7 @@ A2P보다 정확한 단계 일치율은 5.44%p 높았지만 차이는 통계적�
 
 TSR-Loc은 기존 Who&When prompt를 그대로 옮긴 조건보다 Step에서 17.33%p, Agent-Step에서 16.00%p 높았습니다. 다만 Pro 전용 prompt가 수치상 더 높았으므로 Pro SOTA가 아니라, 새 framework와 task에서도 실패 단계 판정 방식이 유지되는지를 본 전이 결과로 해석했습니다.
 
-MP-Bench Automatic 120건에서는 Step-Any가 Direct 67.50%에서 TSR-Loc 83.33%로, Role-Any가 27.50%에서 83.33%로 바뀌었습니다. 여러 전문가 중 한 명의 attribution과 일치하는지를 본 지표이며, 원 benchmark의 평가 시스템을 재현했다는 뜻은 아닙니다.
+MP-Bench Automatic 120건에서는 Step-Any가 Direct 67.50%에서 TSR-Loc 83.33%로, Role-Any가 27.50%에서 83.33%로 바뀌었습니다. 여러 전문가 중 한 명의 attribution과 일치하는지를 본 지표이며, 원 benchmark의 평가 시스템을 재현했다는 뜻은 아닙니다. HC-long과 MP-Bench 비교는 [추가 결과 그림](assets/tsr_loc_results_at_glance.png)과 [외부 전이 결과표](results/external_transfer.csv)에서 확인할 수 있습니다.
 
 ### 병목은 requirement 생성보다 trace localization에 가까웠습니다
 
@@ -143,7 +123,7 @@ MP-Bench Automatic 120건에서는 Step-Any가 Direct 67.50%에서 TSR-Loc 83.33
 | Incident triage | 긴 trace 전체를 다시 읽기 전에 수정 후보가 되는 earliest unrecovered step부터 검토할 수 있습니다. |
 | Evaluator analysis | Agent selection과 step localization을 분리해 어느 쪽에서 평가기가 흔들리는지 볼 수 있습니다. |
 
-TSR-Loc은 observability layer에서 실패 trace의 검토 시작점을 정하는 방법입니다. Root cause를 형식적으로 증명하거나 agent prompt와 tool policy를 자동으로 고치지는 않습니다.
+TSR-Loc은 observability layer에서 실패 trace의 검토 시작점을 정하는 방법입니다. 사람이 전체 로그를 검토할 때 예측한 위치부터 확인할 수 있지만, 실제 장애 대응 시간의 절감은 아직 측정하지 않았습니다. Root cause를 형식적으로 증명하거나 agent prompt와 tool policy를 자동으로 고치지는 않습니다.
 
 ## 8. 저장소 구성
 
@@ -175,6 +155,7 @@ powershell -ExecutionPolicy Bypass -File scripts\run_smoke.ps1 -Python python
 
 - 주 결과는 Who&When AG와 HC 184건에서 얻었습니다. MP-Bench와 Who&When Pro 결과는 외부 전이 확인이며 실제 운영 장애 전체로 일반화하지 않습니다.
 - A2P 결과는 공개 저장소의 프롬프트와 요청 방식을 맞춘 재구현이며 원 저자의 API 실행 결과가 아닙니다.
+- Direct와의 비교는 전체 2단계 파이프라인의 비교입니다. 성공 명세 블록만 맞춰 비교한 별도 통제 실험에서는 유의한 차이를 확인하지 못했으므로, 향상분 전체를 명세 하나의 효과로 해석하지 않습니다.
 - ECHO와 호출·토큰 수치는 별도로 수행한 비교 실험의 집계값입니다.
 - HC-long은 23건의 사후 subset입니다. 장기 trace 전반의 SOTA 근거로 사용하지 않습니다.
 - Who&When Pro는 공개된 injected failure trace의 prediction-blind cohort입니다. Pro 전용 공식 prompt보다 우수하다고 주장하지 않습니다.
