@@ -1,6 +1,6 @@
 <div align="center">
 
-# TSR-Loc: Multi-Agent Failure Localization
+# TSR-Loc: 성공 명세 기반 멀티에이전트 실패 위치 탐지
 
 **멀티에이전트 작업이 실패했을 때, 어떤 에이전트의 어느 행동부터 확인해야 하는지 찾는 연구입니다.**
 
